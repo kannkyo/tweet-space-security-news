@@ -40,14 +40,13 @@ def scraping_space():
     html = requests.get(load_url)
     soup = BeautifulSoup(html.content, "html.parser")
     topics = soup.find(attrs={"class": "topicsList"}).children
-    print(topics)
+    logger.debug(topics)
 
     jst = timezone(timedelta(hours=9))
 
     today = datetime.now(jst).strftime('%Y年%-m月%-d日')
-    today = "2021年6月1日"
 
-    print(f"search {today} topics")
+    logger.info(f"search {today} topics")
 
     messages = list()
     is_include_today_topics = False
@@ -56,7 +55,7 @@ def scraping_space():
             continue
         if topic.name == "dt":
             if topic.text == today:
-                print(f"find {today} topic")
+                logger.info(f"find {today} topic")
                 is_include_today_topics = True
             else:
                 is_include_today_topics = False
@@ -64,9 +63,9 @@ def scraping_space():
             if is_include_today_topics == True:
                 text: str = topic.a.text
                 if "宇宙安全保障部会" in text:
-                    print(f"find 宇宙安全保障部会 in {topic.a}")
+                    logger.info(f"find 宇宙安全保障部会 in {topic.a}")
                     message = f"[宇宙政策委員会 宇宙安全保障部会]\n{topic.a.text}\nhttps://www8.cao.go.jp/space/{topic.a['href']}"
-                    print(message)
+                    logger.info(message)
                     messages.append(message)
 
     return messages
