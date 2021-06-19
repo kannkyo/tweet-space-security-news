@@ -76,10 +76,8 @@ def lambda_handler(event, context):
     try:
         scraping_space()
         secret = get_secret(
-            secret_name="Twitter/tweet-wakatime-stats",
-            region_name="ap-northeast-1")
-
-        logger.info(secret)
+            region_name="ap-northeast-1",
+            secret_name=os.environ.get('TWITTER_SECRET_NAME'))
 
         twitter = OAuth1Session(
             secret['api_key'],
