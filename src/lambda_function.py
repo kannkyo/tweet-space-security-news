@@ -69,6 +69,8 @@ def scraping_space():
                     print(message)
                     messages.append(message)
 
+    return messages
+
 
 def lambda_handler(event, context):
     logger.debug(event)
