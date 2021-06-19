@@ -1,16 +1,12 @@
-# see https://qiita.com/katafuchix/items/7fa1323265b6a448cdbc
-
-import json
-import os
 import logging
+import os
 import traceback
-from requests_oauthlib import OAuth1Session
-from datetime import datetime, timedelta, timezone
 
-import requests
+from cao import scraping_space
+from qiita import get_items
+from requests_oauthlib import OAuth1Session
 from secret import get_secret
 from twitter import tweet_text
-from bs4 import BeautifulSoup
 
 level = os.environ.get('LOG_LEVEL', 'DEBUG')
 
@@ -35,40 +31,24 @@ logger = logging.getLogger()
 logger.setLevel(logger_level())
 
 
-def scraping_space():
-    load_url = "https://www8.cao.go.jp/space/index.html"
-    html = requests.get(load_url)
-    soup = BeautifulSoup(html.content, "html.parser")
-    topics = soup.find(attrs={"class": "topicsList"}).children
-    logger.debug(topics)
+def tweet_qiita_items(twitter: OAuth1Session):
+    messages = get_items("人工衛星+セキュリティ")
+    for message in messages:
+        res_text = tweet_text(
+            twitter=twitter,
+            message=message)
 
-    jst = timezone(timedelta(hours=9))
+    return res_text
 
-    today = datetime.now(jst).strftime('%Y年%-m月%-d日')
 
-    logger.info(f"search {today} topics")
+def tweet_cao(twitter: OAuth1Session):
+    messages = scraping_space()
+    for message in messages:
+        res_text = tweet_text(
+            twitter=twitter,
+            message=message)
 
-    messages = list()
-    is_include_today_topics = False
-    for topic in topics:
-        if topic == "\n":
-            continue
-        if topic.name == "dt":
-            if topic.text == today:
-                logger.info(f"find {today} topic")
-                is_include_today_topics = True
-            else:
-                is_include_today_topics = False
-        elif topic.name == "dd":
-            if is_include_today_topics == True:
-                text: str = topic.a.text
-                if "宇宙安全保障部会" in text:
-                    logger.info(f"find 宇宙安全保障部会 in {topic.a}")
-                    message = f"[宇宙政策委員会 宇宙安全保障部会]\n{topic.a.text}\nhttps://www8.cao.go.jp/space/{topic.a['href']}"
-                    logger.info(message)
-                    messages.append(message)
-
-    return messages
+    return res_text
 
 
 def lambda_handler(event, context):
@@ -87,11 +67,8 @@ def lambda_handler(event, context):
             secret['access_token_secret']
         )
 
-        messages = scraping_space()
-        for message in messages:
-            res_text = tweet_text(
-                twitter=twitter,
-                message=message)
+        res_text = tweet_cao(twitter=twitter)
+        res_text = tweet_qiita_items(twitter=twitter)
 
         return {
             'statusCode': res_text.status_code
@@ -102,9 +79,5 @@ def lambda_handler(event, context):
         raise e
 
 
-def main():
-    lambda_handler(None, None)
-
-
 if __name__ == "__main__":
-    main()
+    lambda_handler(None, None)
