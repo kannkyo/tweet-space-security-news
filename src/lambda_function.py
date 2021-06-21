@@ -7,7 +7,7 @@ from requests.models import Response
 from cao import scraping_space
 from qiita import get_items
 from requests_oauthlib import OAuth1Session
-from rss import get_news_from_rss
+from rss import get_rss_news
 from secret import get_secret
 from twitter import tweet_text
 
@@ -33,12 +33,16 @@ def logger_level():
 logger = logging.getLogger()
 logger.setLevel(logger_level())
 
+keywords_en = r"security|vlus|military|AWS|Azure|Hack"
+keywords_jp = r"セキュリティ|脆弱性|軍事|クラウド|脅威|ハック"
+keywords_all = keywords_en + "|" + keywords_jp
+
 
 def tweet(twitter: OAuth1Session):
     messages = []
     messages.extend(get_items("人工衛星+セキュリティ"))
-    messages.extend(get_news_from_rss("https://sorabatake.jp/feed/",
-                                      r"セキュリティ|脆弱性|軍事|クラウド|脅威|security|vlus|military|AWS|Azure"))
+    messages.extend(get_rss_news("https://spacenews.com/feed/", keywords_en))
+    messages.extend(get_rss_news("https://sorabatake.jp/feed/", keywords_all))
     messages.extend(scraping_space())
 
     res_text = None
