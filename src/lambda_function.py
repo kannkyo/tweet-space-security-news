@@ -37,7 +37,8 @@ logger.setLevel(logger_level())
 def tweet(twitter: OAuth1Session):
     messages = []
     messages.extend(get_items("人工衛星+セキュリティ"))
-    # messages.extend(get_news_from_rss("https://sorabatake.jp/feed/"))
+    messages.extend(get_news_from_rss("https://sorabatake.jp/feed/",
+                                      r"セキュリティ|脆弱性|軍事|クラウド|脅威|security|vlus|military|AWS|Azure"))
     messages.extend(scraping_space())
 
     res_text = None
@@ -45,9 +46,6 @@ def tweet(twitter: OAuth1Session):
         res_text = tweet_text(
             twitter=twitter,
             message=message)
-
-    if res_text == None:
-        res_text = {'status_code': '200', 'reason': ''}
 
     return res_text
 
@@ -69,10 +67,10 @@ def lambda_handler(event, context):
 
         response = tweet(twitter=twitter)
 
-        return {
-            'status_code': response['status_code'],
-            'reason': response['reason']
-        }
+        if response == None:
+            return {'status_code': '200'}
+        else:
+            return {'status_code': response.status_code, 'reason': response.reason}
 
     except Exception as e:
         logger.error(traceback.format_exc())
