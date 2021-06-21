@@ -19,8 +19,7 @@ def get_items(query: str, item_num: int = 5, page: str = "1", par_page: str = "1
 
     conn.request("GET", url)
     res = conn.getresponse()
-
-    logger.info(res.status, res.reason)
+    logger.info(f"response status={res.status} reason={res.reason}")
 
     data = res.read().decode("utf-8")
     jsonstr = json.loads(data)

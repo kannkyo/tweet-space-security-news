@@ -2,6 +2,8 @@ import logging
 import os
 import traceback
 
+from requests.models import Response
+
 from cao import scraping_space
 from qiita import get_items
 from requests_oauthlib import OAuth1Session
@@ -33,20 +35,28 @@ logger.setLevel(logger_level())
 
 def tweet_qiita_items(twitter: OAuth1Session):
     messages = get_items("人工衛星+セキュリティ")
+    res_text = None
     for message in messages:
         res_text = tweet_text(
             twitter=twitter,
             message=message)
+
+    if res_text == None:
+        res_text = {'status_code': '200', 'reason': ''}
 
     return res_text
 
 
 def tweet_cao(twitter: OAuth1Session):
     messages = scraping_space()
+    res_text = None
     for message in messages:
         res_text = tweet_text(
             twitter=twitter,
             message=message)
+
+    if res_text == None:
+        res_text = {'status_code': '200', 'reason': ''}
 
     return res_text
 
@@ -55,7 +65,6 @@ def lambda_handler(event, context):
     logger.debug(event)
 
     try:
-        scraping_space()
         secret = get_secret(
             region_name="ap-northeast-1",
             secret_name=os.environ.get('TWITTER_SECRET_NAME'))
@@ -67,11 +76,12 @@ def lambda_handler(event, context):
             secret['access_token_secret']
         )
 
-        res_text = tweet_cao(twitter=twitter)
-        res_text = tweet_qiita_items(twitter=twitter)
+        response = tweet_cao(twitter=twitter)
+        response = tweet_qiita_items(twitter=twitter)
 
         return {
-            'statusCode': res_text.status_code
+            'status_code': response['status_code'],
+            'reason': response['reason']
         }
 
     except Exception as e:
