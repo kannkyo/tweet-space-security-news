@@ -7,6 +7,8 @@ from datetime import datetime, timedelta, timezone
 
 from dateutil.relativedelta import relativedelta
 
+from common import tag
+
 logger = logging.getLogger()
 
 
@@ -27,8 +29,6 @@ def get_items(query: str, item_num: int = 5, page: str = "1", par_page: str = "1
     jst = timezone(timedelta(hours=9))
     yesterday = (datetime.now(jst) - relativedelta(days=1)).date()
     logger.info(f"search {yesterday} items")
-
-    tag = "#security #space #satellite"
 
     messages = list()
     for num in range(item_num):

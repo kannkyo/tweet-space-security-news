@@ -7,6 +7,7 @@ from requests.models import Response
 from cao import scraping_space
 from qiita import get_items
 from requests_oauthlib import OAuth1Session
+from rss import get_news_from_rss
 from secret import get_secret
 from twitter import tweet_text
 
@@ -33,22 +34,12 @@ logger = logging.getLogger()
 logger.setLevel(logger_level())
 
 
-def tweet_qiita_items(twitter: OAuth1Session):
-    messages = get_items("人工衛星+セキュリティ")
-    res_text = None
-    for message in messages:
-        res_text = tweet_text(
-            twitter=twitter,
-            message=message)
+def tweet(twitter: OAuth1Session):
+    messages = []
+    messages.extend(get_items("人工衛星+セキュリティ"))
+    # messages.extend(get_news_from_rss("https://sorabatake.jp/feed/"))
+    messages.extend(scraping_space())
 
-    if res_text == None:
-        res_text = {'status_code': '200', 'reason': ''}
-
-    return res_text
-
-
-def tweet_cao(twitter: OAuth1Session):
-    messages = scraping_space()
     res_text = None
     for message in messages:
         res_text = tweet_text(
@@ -76,8 +67,7 @@ def lambda_handler(event, context):
             secret['access_token_secret']
         )
 
-        response = tweet_cao(twitter=twitter)
-        response = tweet_qiita_items(twitter=twitter)
+        response = tweet(twitter=twitter)
 
         return {
             'status_code': response['status_code'],

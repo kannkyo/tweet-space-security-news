@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from dateutil.relativedelta import relativedelta
+from common import tag
 
 import requests
 from bs4 import BeautifulSoup
