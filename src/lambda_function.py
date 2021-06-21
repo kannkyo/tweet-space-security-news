@@ -1,8 +1,7 @@
 import logging
 import os
+import time
 import traceback
-
-from requests.models import Response
 
 from cao import scraping_space
 from qiita import get_items
@@ -50,6 +49,7 @@ def tweet(twitter: OAuth1Session):
         res_text = tweet_text(
             twitter=twitter,
             message=message)
+        time.sleep(1)
 
     return res_text
 
