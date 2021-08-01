@@ -23,8 +23,12 @@ def get_rss_news(url: str, exp: str = r""):
             *entry.published_parsed[:6], tzinfo=pytz.utc).astimezone(tz)
         threshold = now - timedelta(hours=THRESHOLD)
 
-        if threshold <= entry_date < now and p.findall(f"{entry.title} {entry.content}"):
-            message = f"{entry.title} {tag} {entry.link}"
+        entry_title = "" if not hasattr(entry, "title") else entry.title
+        entry_content = "" if not hasattr(entry, "content") else entry.content
+        entry_link = "" if not hasattr(entry, "link") else entry.link
+
+        if threshold <= entry_date < now and p.findall(f"{entry_title} {entry_content}"):
+            message = f"{entry_title} {tag} {entry_link}"
             logger.info(f"add date={entry_date}  message={message}")
             messages.append(message)
 
