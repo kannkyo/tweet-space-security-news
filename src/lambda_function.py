@@ -63,10 +63,10 @@ def lambda_handler(event, context):
             secret_name=os.environ.get('TWITTER_SECRET_NAME'))
 
         twitter = OAuth1Session(
-            secret['api_key'],
-            secret['api_secret_key'],
-            secret['access_token'],
-            secret['access_token_secret']
+            secret[os.environ.get('API_KEY')],
+            secret[os.environ.get('API_SECRET_KEY')],
+            secret[os.environ.get('ACCESS_TOKEN')],
+            secret[os.environ.get('ACCESS_TOKEN_SECRET')]
         )
 
         response = tweet(twitter=twitter)
