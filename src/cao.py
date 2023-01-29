@@ -37,11 +37,8 @@ def scraping_space():
                 is_include_yesterday_topics = False
         elif topic.name == "dd":
             if is_include_yesterday_topics == True:
-                text: str = topic.a.text
-                if "宇宙安全保障部会" in text:
-                    logger.info(f"find 宇宙安全保障部会 in {topic.a}")
-                    message = f"[宇宙政策委員会 宇宙安全保障部会]\n{topic.a.text}\nhttps://www8.cao.go.jp/space/{topic.a['href']}"
-                    logger.info(message)
-                    messages.append(message)
+                # text: str = topic.a.text
+                message = f"[宇宙政策委員会]\n{topic.a.text}\nhttps://www8.cao.go.jp/space/{topic.a['href']}"
+                messages.append(message)
 
     return messages
